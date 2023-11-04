@@ -1,387 +1,421 @@
+from datetime import datetime
+
+class Manager:
+    def __init__(self, name, nid):
+       self.name = name
+       self.nid = nid
+       self.email = None
+       self.password = None
+
+
+    def create_account(self, bank):
+       print("Hello.. ", self.name)
+       email = input("enter your email: ")
+       password = input("enter your password: ")
+       done = bank.manager_register(self, email, password)
+       if done == 0:
+           return
+       elif done == 1:
+           self.login(bank)
+       elif done == 2:
+          print("You have successfully created an account, so please login")
+          self.login(bank)
+
+
+
+
+    def login(self, bank):
+       print("Hello.. ",self.name)
+       email = input("enter your email: ")
+       password = input("enter your password: ")
+       done = bank.manager_login(email,password)
+
+       if done == 0:
+           return
+       elif done == 1:
+           self.create_account(bank)
+       elif done == 2:
+
+
+        print("press 1 to chack ballance")
+        print("press 2 to stop loan service")
+        print("press 3 to on loan service")
+        print("press 4 to see history")
+        print("press 5 to see total loan")
+        print("to exit press other")
+        choice = int(input("enter your choice: "))
+
+        if choice == 1:
+            self.check_balance(bank)
+        elif choice == 2:
+            self.stop_loan_feature(bank)
+        elif choice == 3:
+            self.activate_loan_feature(bank)
+        elif choice == 4:
+            self.check_tarnsaction_history(bank)
+        elif choice == 5:
+            self.see_loan(bank)
+        else:
+           print("Thank you")
+           return
+
+
+
+    def check_balance(self, bank):
+       print(bank.balance)
+
+    def stop_loan_feature(self, bank):
+        bank.available_loan = False
+
+    def activate_loan_service(self, bank):
+        bank.available_loan = True
+
+    def check_tarnsaction_history(self, bank):
+      bank.see_history()
+
+    def see_loan(self, bank):
+       print(bank.loan_amount())
+
+
+    def __repr__(self) -> str:
+       return f'Post : Manager\nName : {self.name}\nEmail : {self.email}'
+
+
+class Transaction:
+    def __init__(self, user, amount):
+       self.name = user.name
+       self.amount = amount
+       self.time = datetime.today()
+       self.userId = user.user_code
+       self.cur_balance = user.balance
+
+
+
+class Loan_Transaction(Transaction):
+    def __init__(self, user, amount):
+        super().__init__(user, amount)
+
+    def __repr__(self) -> str:
+        return f'-------- LOAN ---------\nUser Name : {self.name}\nUser id : {self.userId}\nLoan amount : {self.amount}\nCurrent Balance > {self.cu_balance}\nTime : {self.time}'
+
+
+class Deposit_Transaction(Transaction):
+    def __init__(self, user, amount):
+        super().__init__(user, amount)
+
+    def __repr__(self) -> str:
+        return f'-------- DIPOSIT ---------\nUser Name : {self.name}\nUser id : {self.userId}\nDeposit Amount : {self.amount}\nCurrent Balance : {self.crrent_ballance}\nTime : {self.time}'
+
+class Withdrawal_Transaction(Transaction):
+    def __init__(self, user, amount):
+        super().__init__(user, amount)
+
+    def __repr__(self) -> str:
+        return f'-------- WITHDRAWAL ---------\nUser Name : {self.name}\nUser Id :  {self.userId}\nWithdraw Amount : {self.amount}\nCurrent Balance : {self.cur_balance}\nTime : {self.time}'
+
+
+class Send_Money(Transaction):
+    def __init__(self, user, amount, receiver):
+        super().__init__(user, amount)
+        self.receiver_id = receiver.user_code
+        self.receiver_name = receiver.name
+
+
+    def __repr__(self) -> str:
+        return f'-------- SEND MONEY ---------\nReceiver Name : {self.receiver_name}\nReceiver CODE : {self.receiver_id}\nSend Amount : {self.amount}\nCurrent Balance : {self.cur_balance}\nTime : {self.time}'
+
+
+
+class Receive_Money(Transaction):
+    def __init__(self, user, amount, receiver):
+        super().__init__(user, amount)
+        self.receive_balance = receiver.balance
+
+    def __repr__(self) -> str:
+        return f'-------- RECEIVE MONEY ---------\nSender Name :  {self.name}\nSender Code : {self.userId}\nSend Amount : {self.amount}\nCurrent Balance : {self.receive_balance}\nTime : {self.time}'
+
+
+class Money_transfer(Transaction):
+    def __init__(self, user, amount, receiver):
+        super().__init__(user, amount)
+        self._name = receiver.name
+        self._id = receiver.user_code
+        self._balance = receiver.balance
+
+    def __repr__(self) -> str:
+        return f"""
+-------- MONEY TRANSFER ---------
+    ------ SENDER -----
+Sender Name :  {self.name}
+Sender Code : {self.userId}
+Transfered Amount : {self.amount}
+Sender Current Balance : {self.cur_balance}
+
+    ------- RECEIVER -------
+RECEIVER NAME :  {self._name}
+RECEIVER CODE : {self._id}
+SEND AMOUNT : {self.amount}
+Current Balance : { self._balance}
+Time : {self.time}
+        """
+
+class User:
+    def __init__(self, name, nid) -> None:
+        self.name = name
+        self.nid = nid
+        self.user_code = None
+        self.email = None
+        self.password = None
+        self.balance = 0
+        self.Loan = 0
+        self.history = []
+
+
+
+    def create_user_account(self, bank):
+        print("Hello.. ", self.name)
+        if self.user_code != None:
+            print("You are already a user!!")
+            done = int(input("press 1 to login your account "
+                             "to exit press any rather than 1: "))
+            if done == 1:
+                self.login(bank)
+            else :
+                print("Thank you")
+        else:
+            email = input("Enter your email: ")
+            password = input("Enter your password: ")
+            done = bank.register_system(self, email, password)
+            if done == 0:
+                return
+            print("You have successfully registered to bank!!")
+            print("Now please login again to continue the next activities")
+            self.login(bank)
+
+
+    def login(self, bank):
+        print("Hello ", self.name)
+        email = input("Enter your email: ")
+        password = input("Enter your password: ")
+        done = 0
+        done = bank.login(email,password)
+        if done == 0:
+            print("Invalid email or password try again or create a new account")
+            return None
+        print("You have successfully login to bank!!")
+        print("press 1 to check balance: ")
+        print("press 2 to withdraw: ")
+        print("press 3 to deposit: ")
+        print("press 4 to send money: ")
+        print("press 5 to loan: ")
+        print("press 6 history: ")
+        print("press exit press other: ")
+
+
+        choice = int(input("Enter your choice: "))
+        if choice == 1:
+            self.chack_balance()
+        elif choice == 2:
+            amount = int(input("Enter the amount you want to withdraw: "))
+            self.withdraw(bank, amount)
+
+        elif choice == 3:
+           amount = int(input("Enter the amount you want to depost: "))
+           self.deposit(bank, amount)
+        elif choice == 4:
+          userid = int(input("Enter the use id: "))
+          amount = int(input("Enter the amount you want to send: "))
+          self.transfer_money(bank, userid, amount)
+        elif choice == 5:
+            amount = int(input("Enter the amount you want to loan: "))
+            self.loan(bank, amount)
+
+        elif choice == 6:
+           self.check_history()
+        else:
+            return f''
+
+
+
+    def check_balance(self):
+        print("Your current balance is ", self.balance)
+
+    def deposit(self, bank, amount):
+        bank.deposit_request(self, amount)
+
+
+    def withdraw(self, bank, amount):
+        bank.withdraw_request(self, amount)
+
+    def loan(self, bank, amount):
+       bank.loan_request(self, amount)
+
+    def check_history(self):
+        for i in self.history:
+            print("----------")
+            print(i)
+
+    def transfer_money(self, bank, receiver_id, amount):
+        bank.send_money_request(self, receiver_id, amount)
+
+
+
+
+    def __repr__(self) -> str:
+       return f'Name : {self.name}\nNid : {self.nid}\nEmail : {self.email}\nIdcode : {self.user_code}\nBalance : {self.balance}\nLoan = {self.Loan}\n'
+
+
 class Bank:
-    def __init__(self):
-        self.client_details_list = []
-        self.loggedin = False
-        self.cash = 100
-        self.loan = 0
-        # self.total_cash = self.cash
-        self.TranferCash = False
-        self.admin_details_list = []
-        self.loggedin_admin = False
-        self.loan_feature = True
-        self.transaction_history = []
+   def __init__(self, name, initial_account_balance):
+      self.name = name
+      self .__balance = initial_account_balance
+      self.next_user_code = 101
+      self.history =[]
+      self.user_with_id = {}
+      self.email_pass = {}
+      self.loan_if_available = True
+      self.total_subscriber = 0
+      self.total_loan = 0
+      self.manager = None
+      self.manager_pass = None
+      self.manager_email = None
 
-    def register_user(self, name , ph , password):
-        cash = self.cash
-        conditions = True
-        if len(str(ph)) > 10 or len(str(ph)) < 10:
-            print("Invalid Phone number ! please enter 11 digit number")
-            conditions = False
-
-        if len(password) < 5 or len(password) > 18:
-            print("Enter password greater than 5 and less than 18 character")
-            conditions = False
-
-        if conditions == True:
-            print("Account created successfully")
-            self.client_details_list = [name , ph , password , cash]
-            with open(f"{name}.txt","w") as f:
-                for details in self.client_details_list:
-                    f.write(str(details)+"\n")
+   def manager_register(self, manager, email, password):
+      if self.manager == manager:
+         print("You are registered as manager so please login")
+         return 1
+      if self.manager != None:
+         print("We have already a manager so we do not need another one")
+         return 0
+      self.manager = manager
+      self.manager_email = email
+      self.manager_pass = password
+      manager.email = email
+      manager.password = password
+      return 2
 
 
-    def register_admin(self, name, ph, password):
-        cash = self.cash
-        conditions = True
-        if len(str(ph)) > 10 or len(str(ph)) < 10:
-            print("Invalid Phone number ! please enter 11 digit number")
-            conditions = False
-
-        if len(password) < 5 or len(password) > 18:
-            print("Enter password greater than 5 and less than 18 character")
-            conditions = False
-
-        if conditions == True:
-            print("Account created successfully")
-            self.admin_details_list = [name , ph , password , cash]
-            with open(f"{name}.txt","w") as f:
-                for details in self.admin_details_list:
-                    f.write(str(details)+"\n")
+   def manager_login(self, email, password):
+      if self.manager == None:
+         print("You are not register again and we also need a manager so please register first")
+         return 1
+      if email != self.manager_email or password != self.manager_pass:
+         print("Invalid password or email!")
+         print(email, self.manager_email)
+         print(password, self.manager)
+         return 0
+      if email == self.manager_email and password == self.manager_pass:
+         print("Successfully logged in")
+         return 2
 
 
 
-    def take_loan(self, amount):
-        if amount <= self.cash and self.loan_feature:
-            self.loan += amount
+   def see_history(self):
+      print("---------OVER ALL TRANSACTION HISTORY OF THE BANK ----------")
+      for i in self.history:
+         print(i)
+
+   @property
+   def balance(self):
+      return self.__balance
+
+   def loan_amount(self):
+       return self.total_loan
 
 
-    def login_user(self, name , ph , password):
-        with open(f"{name}.txt","r") as f:
-            details = f.read()
-            self.client_details_list = details.split("\n")
-            if str(ph) in str(self.client_details_list):
-                if str(password) in str(self.client_details_list):
-                    self.loggedin = True
+   def register_system(self, user, email, passwoed):
+      if email in self.email_pass:
+         print("There is already a user id with this email so you can not create a new id")
+         return 0
+      user.user_code = self.next_user_code
+      self.next_user_code += 1
+      self.email_pass[email] = passwoed
+      self.user_with_id[user.user_code] = user
+      self.total_subscriber += 1
+      user.email = email
+      user.password = passwoed
+      return 1
 
-            if self.loggedin == True:
-                print(f"{name} logged in")
-                self.cash = int(self.client_details_list[3])
-                self.name = name
+   def login(self, email, passwoed):
+      if email not in self.email_pass:
+         return 0
+      if self.email_pass[email] != passwoed:
+         return 0
+      return 1
 
-            else:
-                print("Wrong details")
+   def deposit_request(self, user, amount):
+      if amount > 0:
+         self.__balance += amount
+         user.ballance += amount
+         new_tansaction = Deposit_Transaction(user, amount)
+         user.history.append(new_tansaction)
+         self.history.append(new_tansaction)
+         print("See the new transaction")
+         print(new_tansaction)
 
-    def login_admin(self, name , ph , password):
-        with open(f"{name}.txt","r") as f:
-            details = f.read()
-            self.admin_details_list = details.split("\n")
-            if str(ph) in str(self.admin_details_list):
-                if str(password) in str(self.admin_details_list):
-                    self.loggedin_admin = True
+   def withdraw_request(self, user, amount):
+      if user.balance < amount:
+         print("You do not have sufficient balacne")
+         return
+      else :
+         user.ballance -= amount
+         self.__balance -= amount
+         new_tansaction = Withdrawal_Transaction(user, amount)
+         user.history.append(new_tansaction)
+         self.history.append(new_tansaction)
+         print("See the new tansaction")
+         print(new_tansaction)
 
-            if self.loggedin_admin == True:
-                print(f"{name} logged in")
-                # self.cash = self.total_cash
-                self.name = name
-
-            else:
-                print("Wrong details")
-
-    def add_cash(self, amount):
-        if amount > 0:
-            self.cash += amount
-            # self.total_cash += amount
-            with open(f"{name}.txt","r") as f:
-                details = f.read()
-                self.client_details_list = details.split("\n")
-
-            with open(f"{name}.txt","w") as f:
-                f.write(details.replace(str(self.client_details_list[3]),str(self.cash)))
-
-            print("Amount added successfully")
-
+   def loan_request(self, user, amount):
+      if self.loan_if_available  or amount < self.__balance:
+        if amount > user.balance * 2:
+           print("You are not eligible to get a loan of this amount ")
+           return
         else:
-            print("Enter correct value of amount")
+           user.balance += amount
+           self.__balance -= amount
+           new_tansaction = Loan_Transaction(user, amount)
+           user.history.append(new_tansaction)
+           self.history.append(new_tansaction)
+           user.Loan += amount
+           print("See the new tansaction")
+           print(new_tansaction)
+           self.total_loan += amount
 
+      else:
+         print("Sorry this service is not available due to our internet problem!")
 
-    def withdraw_cash(self, amount):
-        if amount > 0:
-            if self.cash >= amount:
-                self.cash -= amount
-                # self.total_cash -= amount
-                self.transaction_history.append(f'You have transactioned {amount} from your account')
-                with open(f"{name}.txt","r") as f:
-                    details = f.read()
-                    self.client_details_list = details.split("\n")
+   def send_money_request(self, sender, receiver_id, amount):
+      if sender.balance < amount:
+         print("You do not have enough money")
+         return
+      if receiver_id not in self.user_with_id:
+         print("Could not find any user with the given id")
+         return
+      sender.balance -= amount
+      self.user_with_id[receiver_id].ballance += amount
+      new_transaction = Send_Money(sender, amount, self.user_with_id[receiver_id])
+      sender.history.append(new_transaction)
+      trans_money =  Money_transfer(sender,amount, self.user_with_id[receiver_id])
+      self.history.append(trans_money)
+      print("See the new transaction")
+      print(new_transaction)
+      new_tansaction1 = Receive_Money(sender,amount, self.user_with_id[receiver_id])
+      self.user_with_id[receiver_id].history.append(new_tansaction1)
+      print(new_tansaction1)
 
-                with open(f"{name}.txt","w") as f:
-                    f.write(details.replace(str(self.client_details_list[3]),str(self.cash)))
-
-                print("Amount added successfully")
-
-        else:
-            print("Enter correct value of amount")
-
-    def Tranfer_cash(self, amount , name ,ph):
-        with open(f"{name}.txt","r") as f:
-            details = f.read()
-            self.client_details_list = details.split("\n")
-            if str(ph) in self.client_details_list:
-                self.TranferCash = True
-
-            if self.TranferCash == True:
-                for x in self.client_details_list:
-                    if x[0] == name:
-                        x[3] += amount
-                        break
-
-                self.cash -= amount
-
-
-        if self.TranferCash == True:
-            # total_cash = int(self.client_details_list[3]) + amount
-            left_cash = self.cash - amount
-            with open(f"{name}.txt","w") as f:
-                f.write(details.replace(str(self.client_details_list[3]),str(total_cash)))
-
-            with open(f"{self.name}.txt","r") as f:
-                details_2 = f.read()
-                self.client_details_list = details_2.split("\n")
-
-            with open(f"{self.name}.txt","w") as f:
-                f.write(details_2.replace(str(self.client_details_list[3]),str(left_cash)))
-
-            print("Amount Transfered Successfully to",name,"-",ph)
-            print("Balance left =",left_cash)
-            self.cash = left_cash
-
-    def password_change(self, password):
-        if len(password) < 5 or len(password) > 18:
-            print("Enter password greater than 5 and less than 18 character")
-        else:
-            with open(f"{self.name}.txt","r") as f:
-                details = f.read()
-                self.client_details_list = details.split("\n")
-
-            with open(f"{self.name}.txt","w") as f:
-                f.write(details.replace(str(self.client_details_list[2]),str(password)))
-            print("new Password set up successfully")
-
-    def ph_change(self , ph):
-        if len(str(ph)) > 10 or len(str(ph)) < 10:
-            print("Invalid Phone number ! please enter 10 digit number")
-        else:
-            with open(f"{self.name}.txt","r") as f:
-                details = f.read()
-                self.client_details_list = details.split("\n")
-
-            with open(f"{self.name}.txt","w") as f:
-                f.write(details.replace(str(self.client_details_list[1]),str(ph)))
-            print("new Phone number set up successfully")
-
-
+def main():
+    bank1 = Bank("Bangladesh Bank", 1000000000)
+    manager1 = Manager("Sabib", "123456")
+    manager1.create_account(bank1)
+    person1 = User("Aspia",12234)
+    person1.create_user_account(bank1)
+    person2 = User("Priangshu", 12244)
+    person2.create_user_account(bank1)
+    print("The person2 information is ")
+    print(person2)
+    person1.login(bank1)
+    manager1.login(bank1)
 
 if __name__ == "__main__":
-    total_cash = 0
-    Bank_object = Bank()
-    print("------------------ Welcome to my Bank -------------------------")
-    print("1.Login")
-    print("2.Create a new Account")
-    print("3.Admin Login")
-    print("4.Create new Admin Account")
-    user = int(input("Make decision: "))
-
-    print('-----------------------------------------------------------------\n\n')
-
-    if user == 1:
-        print("Logging in")
-        name = input("Enter Name: ")
-        ph = int(input("Enter Phone Number: "))
-        password = input("Enter password: ")
-        Bank_object.login_user(name, ph, password)
-        while True:
-            if Bank_object.loggedin:
-                print("1.Deposit amount")
-                print("2.Check Balance")
-                print("3.Transfer amount")
-                print("4.Edit profile")
-                print("5.Withdraw Amount")
-                print("6.Check Transaction History")
-                print("7.Take Loan")
-                print("8.Logout")
-                login_user_key = int(input())
-                if login_user_key == 1:
-                    print("Balance =",Bank_object.cash)
-                    amount = int(input("Enter amount: "))
-                    Bank_object.add_cash(amount)
-                    total_cash += amount
-                    print("\n1.back menu")
-                    print("2.Logout")
-                    choose = int(input())
-                    if choose == 1:
-                        continue
-                    elif choose == 2:
-                        break
-
-                elif login_user_key == 2:
-                    print("Balacne =",Bank_object.cash)
-                    print("\n1.back menu")
-                    print("2.Logout")
-                    choose = int(input())
-                    if choose == 1:
-                        continue
-                    elif choose == 2:
-                        break
-
-                elif login_user_key == 3:
-                    print("Balance =",Bank_object.cash)
-                    amount = int(input("Enter amount: "))
-                    if amount >= 0 and amount <= Bank_object.cash:
-                        name = input("Enter person name: ")
-                        ph = input("Enter person phone number: ")
-                        Bank_object.Tranfer_cash(amount,name,ph)
-                        print("\n1.back menu")
-                        print("2.Logout")
-                        choose = int(input())
-                        if choose == 1:
-                            continue
-                        elif choose == 2:
-                            break
-                    elif amount < 0 :
-                        print("Enter please correct value of amount")
-
-                    elif amount > Bank_object.cash:
-                        print("Not enough balance")
-
-                elif login_user_key == 4:
-                    print("1.Password change")
-                    print("2.Phone Number change")
-                    edit_profile = int(input())
-                    if edit_profile == 1:
-                        new_passwrod = input("Enter new Password: ")
-                        Bank_object.password_change(new_passwrod)
-                        print("\n1.back menu")
-                        print("2.Logout")
-                        choose = int(input())
-                        if choose == 1:
-                            continue
-                        elif choose == 2:
-                            break
-                    elif edit_profile == 2:
-                        new_ph = int(input("Enter new Phone Number: "))
-                        Bank_object.ph_change(new_ph)
-                        print("\n1.back menu")
-                        print("2.Logout")
-                        choose = int(input())
-                        if choose == 1:
-                            continue
-                        elif choose == 2:
-                            break
-
-
-                elif login_user_key == 5:
-                    amount = int(input("Enter amount: "))
-                    Bank_object.withdraw_cash(amount)
-                    if total_cash < amount:
-                        print('This bank is bankrupt')
-                    else:
-                        total_cash -= amount
-                    print("\n1.back menu")
-                    print("2.Logout")
-                    choose = int(input())
-                    if choose == 1:
-                        continue
-                    elif choose == 2:
-                        break
-
-                elif login_user_key == 6:
-                    for doc in Bank_object.transaction_history:
-                        print(doc)
-
-
-                elif login_user_key == 7:
-                    amount = int(input("Enter amount: "))
-                    Bank_object.take_loan(amount)
-                    print("\n1.back menu")
-                    print("2.Logout")
-                    choose = int(input())
-                    if choose == 1:
-                        continue
-                    elif choose == 2:
-                        break
-
-
-                elif login_user_key == 8:
-                    break
-
-
-    if user == 2:
-        print("Creating a new  Account")
-        name = input("Enter Name: ")
-        ph = int(input("Enter Phone Number: "))
-        password = input("Enter password: ")
-        Bank_object.register_user(name, ph, password)
-
-
-
-    if user == 3:
-        print("Logging in")
-        name = input("Enter Name: ")
-        ph = int(input("Enter Phone Number: "))
-        password = input("Enter password: ")
-        Bank_object.login_admin(name, ph, password)
-        while True:
-            if Bank_object.loggedin_admin:
-                print("1.Total Available Balance")
-                print("2.Check Total Loan")
-                print("3.Loan Feature")
-                print("4.Logout")
-                login_admin_key = int(input())
-                if login_admin_key == 1:
-                    print("Balance =",total_cash)
-                    print("\n1.back menu")
-                    print("2.Logout")
-                    choose = int(input())
-                    if choose == 1:
-                        continue
-                    elif choose == 2:
-                        break
-
-                elif login_admin_key == 2:
-                    print("Total Loan =",Bank_object.loan)
-                    print("\n1.back menu")
-                    print("2.Logout")
-                    choose = int(input())
-                    if choose == 1:
-                        continue
-                    elif choose == 2:
-                        break
-
-                elif login_admin_key == 3:
-                    if Bank_object.loan_feature == False:
-                        print("Do you want to turn on loan feature?")
-                        print("1.YES")
-                        print("2.NO")
-                        choose = int(input())
-                        if choose == 1:
-                            Bank_object.loan_feature = True
-
-                    else:
-                        print("Do you want to turn off loan feature?")
-                        print("1.YES")
-                        print("2.NO")
-                        choose = int(input())
-                        if choose == 1:
-                            Bank_object.loan_feature = False
-
-                elif login_admin_key == 4:
-                    break
-
-
-    if user == 4:
-        print("Creating a new  Account")
-        name = input("Enter Name: ")
-        ph = int(input("Enter Phone Number: "))
-        password = input("Enter password: ")
-        Bank_object.register_admin(name, ph, password)
-
+    main()
